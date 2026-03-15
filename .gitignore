@@ -27,3 +27,7 @@ yarn-error.log*
 
 # .env
 
+# uploads (CVs)
+**/uploads
+backend/uploads
+
