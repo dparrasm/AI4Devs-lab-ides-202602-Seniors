@@ -1,0 +1,92 @@
+---
+description: Git workflow and collaboration rules for the LTI lab project
+globs: ".git/**/*,.gitignore,**/.git*,.cursor/**/*"
+alwaysApply: false
+---
+
+# Git — LTI Lab
+
+Rules and conventions for version control and collaboration in this repository.
+
+These rules apply whenever work will modify files or produce commits.
+
+---
+
+## Branching strategy
+
+- Keep `main` as the stable branch unless the repository explicitly uses another default branch.
+- Create a short-lived branch per task:
+  - `feature/<short-description>`
+  - `fix/<short-description>`
+  - `docs/<short-description>`
+- Do not push directly to `main` unless the user explicitly asks for that and the workflow allows it.
+
+---
+
+## Commits
+
+- Make **atomic commits**: one logical change per commit.
+- Use clear, imperative commit messages.
+- English commit messages are preferred for consistency.
+
+Examples:
+
+- `feat: add user list endpoint`
+- `fix: align frontend test with app content`
+- `docs: add cursor project rules`
+
+Avoid:
+
+- `wip`
+- `stuff`
+- `misc fixes`
+
+---
+
+## What not to commit
+
+- Secrets
+- `.env` files with real values
+- `node_modules/`
+- build artifacts such as `build/` and `dist/`
+- temporary local files
+
+The `.cursor/` rules and commands are part of the shared project setup and should be versioned when intentionally added or updated.
+
+---
+
+## Workflow
+
+1. Start from an updated base branch.
+2. Create a task-focused branch.
+3. Implement the change.
+4. Run the relevant tests or checks if possible.
+5. Commit logically grouped changes.
+6. Push the branch and open a PR if the workflow uses pull requests.
+
+---
+
+## Pull requests
+
+- Keep PRs reviewable in size.
+- Summarize what changed and why.
+- Mention follow-up work, migration steps, or manual verification steps when relevant.
+- Avoid mixing unrelated refactors with the requested feature.
+
+---
+
+## Safety rules
+
+- Do not rewrite shared history unless the user explicitly asks for it.
+- Do not use destructive Git commands casually.
+- Review staged changes before committing, especially because this repo contains environment-related files.
+
+---
+
+## Quick checklist
+
+- [ ] Work happens on a task-focused branch.
+- [ ] Commits are atomic and clearly named.
+- [ ] No secrets or generated artifacts are committed.
+- [ ] `.cursor/` prompting files are versioned when intentionally changed.
+- [ ] Unrelated changes are not bundled into the same commit.

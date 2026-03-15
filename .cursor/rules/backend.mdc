@@ -1,0 +1,178 @@
+---
+description: Backend rules and conventions for the LTI lab project (Express + TypeScript + Prisma)
+globs: "backend/**/*,**/backend/src/**/*.ts,**/backend/src/**/*.js,**/backend/prisma/**/*"
+alwaysApply: false
+---
+
+# Backend — LTI Lab
+
+Rules and conventions for the backend of this repository.
+
+**Current stack:** Node.js + Express + TypeScript + Prisma + Jest + Supertest.
+
+The current backend is a **minimal Express baseline**. New work should improve it incrementally without forcing a framework migration or broad refactor unless explicitly requested.
+
+---
+
+## Non-negotiable repo-fit rule
+
+- Adapt backend work to the **existing Express project**.
+- Do **not** migrate to NestJS, Fastify, Hono, or another backend framework unless the user explicitly asks for that.
+- Do **not** reorganize unrelated backend areas just to match an ideal architecture.
+- If structure needs to grow, grow it incrementally around the feature being added.
+
+---
+
+## Current structure
+
+The backend currently starts from:
+
+```
+backend/
+├── prisma/
+│   └── schema.prisma
+├── src/
+│   ├── index.ts
+│   └── tests/
+└── package.json
+```
+
+As the project grows, prefer an incremental structure like:
+
+```
+backend/src/
+├── index.ts
+├── app.ts
+├── config/
+├── routes/
+├── controllers/
+├── services/
+├── middleware/
+├── lib/
+├── db/
+└── tests/
+```
+
+- Only introduce these folders when they help the current task.
+- Avoid sweeping file moves unless the user asked for a refactor.
+
+---
+
+## App and server structure
+
+- Prefer separating **app creation** from **server startup** once the backend has more than trivial logic.
+- Export the Express `app` in a way that keeps Supertest-based testing straightforward.
+- Keep `index.ts` focused on bootstrap concerns: environment loading, app startup, and graceful shutdown when needed.
+
+---
+
+## Route, controller, service responsibilities
+
+- **Routes:** define endpoints and wire handlers.
+- **Controllers:** translate HTTP input/output.
+- **Services:** contain business logic and Prisma/database access.
+
+Do not put complex business logic directly inside route handlers.
+
+For very small changes in the current minimal codebase, an inline handler may be acceptable, but once logic grows, extract it.
+
+---
+
+## API conventions
+
+- Use REST-style endpoints when appropriate.
+- Return JSON for API responses.
+- Use consistent status codes:
+  - `200` for successful reads/updates
+  - `201` for creates
+  - `204` for deletes with no response body
+  - `400` for invalid input
+  - `404` for missing resources
+  - `409` for conflicts
+  - `500` for unexpected server errors
+- Prefer a consistent response shape for new endpoints, for example:
+  - `{ "data": ... }`
+  - `{ "error": { "message": "..." } }`
+
+If touching legacy responses, preserve compatibility unless the task explicitly includes changing the contract.
+
+---
+
+## Prisma and data access
+
+- Keep Prisma access out of large route handlers when possible.
+- Reuse a centralized Prisma client instead of instantiating clients in many places.
+- Do not edit generated Prisma client files by hand.
+- When the backend grows, move Prisma access into `services/`, `db/`, or `lib/` modules.
+
+---
+
+## Validation
+
+- Validate request params, query values, and bodies at runtime.
+- For small changes, explicit guard clauses are acceptable.
+- For input-heavy features, prefer one consistent validation approach across the touched code.
+- Do not rely on TypeScript types alone for runtime validation.
+
+---
+
+## Error handling
+
+- Prefer a central Express error middleware for new backend work.
+- Do not leak stack traces or internal details in production responses.
+- Log useful diagnostic context on the server side.
+- New API endpoints should prefer JSON error responses over plain text.
+
+---
+
+## Configuration
+
+- Use `dotenv` and environment variables for configuration.
+- Do not hardcode secrets or environment-specific values.
+- If new config values are introduced, keep naming explicit and document them if relevant.
+- Be careful not to commit `.env` contents.
+
+---
+
+## Swagger and API docs
+
+- `swagger-jsdoc` and `swagger-ui-express` are installed.
+- Only introduce or update Swagger/OpenAPI docs when the task includes API documentation or the touched code already uses that pattern.
+
+---
+
+## Testing
+
+- Use Jest + Supertest for backend tests.
+- Place tests under `backend/src/tests/` unless a deliberate, consistent structure change is part of the task.
+- Update tests whenever endpoint behavior changes.
+- Prefer testing real request/response behavior instead of internals.
+
+---
+
+## Naming
+
+- Files: camelCase for modules like `userService.ts`, `authController.ts`
+- Route files: resource-oriented naming like `users.ts`, `auth.ts`
+- Types/interfaces/classes: PascalCase
+- Functions and variables: camelCase
+
+---
+
+## Security and reliability
+
+- Never trust user input.
+- Avoid ad hoc SQL string construction; use Prisma or parameterized queries.
+- Keep middleware ordering correct.
+- Do not block the event loop with unnecessary synchronous work.
+
+---
+
+## Quick checklist
+
+- [ ] The change fits the existing Express + TypeScript backend.
+- [ ] No unnecessary framework migration or unrelated refactor was introduced.
+- [ ] HTTP responsibilities are separated when logic grows.
+- [ ] Validation exists for incoming data.
+- [ ] Prisma usage is centralized and not duplicated carelessly.
+- [ ] Tests were updated for changed behavior.

@@ -1,0 +1,156 @@
+---
+description: Frontend rules and conventions for the LTI lab project (React + Create React App)
+globs: "frontend/**/*,**/frontend/src/**/*.ts,**/frontend/src/**/*.tsx,**/frontend/src/**/*.css,**/frontend/public/**/*"
+alwaysApply: false
+---
+
+# Frontend — LTI Lab
+
+Rules and conventions for the frontend of this repository.
+
+**Current stack:** React 18 + TypeScript + Create React App + Jest + React Testing Library.
+
+The frontend is currently a **small CRA baseline**. New work must extend that baseline pragmatically instead of forcing a migration to another framework.
+
+---
+
+## Non-negotiable repo-fit rule
+
+- Adapt changes to the **existing CRA project**.
+- Do **not** migrate to Next.js, Vite, Remix, or another frontend stack unless the user explicitly asks for that.
+- Do **not** introduce major folder reshuffles unless the task clearly needs them.
+- Keep changes incremental and local to the feature being implemented.
+
+---
+
+## Current structure
+
+The current frontend starts from:
+
+```
+frontend/
+├── public/
+├── src/
+│   ├── App.tsx
+│   ├── App.css
+│   ├── index.tsx
+│   ├── index.css
+│   ├── setupTests.ts
+│   └── tests/
+└── package.json
+```
+
+When the app grows, prefer an incremental structure like:
+
+```
+frontend/src/
+├── App.tsx
+├── index.tsx
+├── components/
+├── pages/
+├── hooks/
+├── services/      # API calls or feature services
+├── types/
+├── utils/
+├── styles/
+└── tests/
+```
+
+- Only create new top-level folders when they clearly improve the feature being added.
+- Keep `App.tsx` as a composition root or main screen, not a dumping ground for all logic.
+
+---
+
+## Component conventions
+
+- Use **functional components** only.
+- Type component props explicitly with `interface` or `type`.
+- Prefer one component per file once components stop being trivial.
+- Keep reusable UI pieces in `components/`; keep page-level orchestration in `App.tsx` or `pages/`.
+- If a component becomes too large, extract child components or hooks instead of adding more inline logic.
+
+Example:
+
+```tsx
+interface UserCardProps {
+  name: string;
+  email: string;
+}
+
+export function UserCard({ name, email }: UserCardProps) {
+  return (
+    <article>
+      <h2>{name}</h2>
+      <p>{email}</p>
+    </article>
+  );
+}
+```
+
+---
+
+## State and effects
+
+- Use `useState` for local UI state.
+- Use `useEffect` for side effects only.
+- Extract repeated or data-oriented logic into custom hooks under `frontend/src/hooks/`.
+- Do not introduce global state libraries unless the feature actually needs shared cross-screen state.
+- Do not add routing libraries, state managers, or form libraries unless the task justifies the dependency.
+
+---
+
+## API communication
+
+- Centralize HTTP requests in a dedicated area such as `frontend/src/services/` or `frontend/src/api/`.
+- Do not scatter fetch logic across many UI components.
+- Use TypeScript types for request and response data.
+- Surface loading and error states in the UI.
+- Frontend environment variables must use the CRA convention: `REACT_APP_*`.
+- Never expose secrets in frontend code.
+
+---
+
+## Styling
+
+- Preserve a consistent styling approach within the touched area.
+- The current project already uses plain CSS (`App.css`, `index.css`); continue with plain CSS unless there is a clear reason to introduce CSS Modules for a new feature.
+- Do not mix multiple styling systems in the same feature without a good reason.
+- Keep accessibility in mind: semantic HTML, visible focus states, labels for inputs, and sufficient contrast.
+
+---
+
+## Forms
+
+- Type form state explicitly.
+- Validate required fields in the UI for usability, but keep backend validation as the source of truth.
+- Disable submit actions while requests are in flight when appropriate.
+- Show clear success and error feedback.
+
+---
+
+## Testing
+
+- Use Jest + React Testing Library for frontend tests.
+- Place tests in `frontend/src/tests/` or alongside the component if the codebase moves in that direction deliberately.
+- Update or add tests when behavior changes.
+- Prefer behavior-focused tests over implementation-detail assertions.
+
+---
+
+## Naming
+
+- Components: PascalCase (`UserList.tsx`)
+- Hooks and utilities: camelCase (`useUsers.ts`, `formatDate.ts`)
+- Types/interfaces: PascalCase
+- CSS files: match the component or feature naming where practical
+
+---
+
+## Quick checklist
+
+- [ ] The change fits the current React + CRA setup.
+- [ ] No unnecessary migration or unrelated refactor was introduced.
+- [ ] UI logic is separated from repeated data-fetching logic when needed.
+- [ ] API calls are centralized and typed.
+- [ ] Loading, empty, and error states are handled.
+- [ ] Tests were updated when behavior changed.

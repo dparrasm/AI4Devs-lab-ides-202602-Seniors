@@ -1,0 +1,117 @@
+---
+description: Database rules and conventions for the LTI lab project (Prisma + PostgreSQL)
+globs: "backend/prisma/**/*,**/backend/**/*.sql,**/backend/src/**/db/**/*,**/backend/src/**/database/**/*"
+alwaysApply: false
+---
+
+# Database — LTI Lab
+
+Rules and conventions for the data layer of this repository.
+
+**Current stack:** Prisma ORM over PostgreSQL.
+
+The schema currently lives in `backend/prisma/schema.prisma` and is the primary source of truth for application models.
+
+---
+
+## Non-negotiable repo-fit rule
+
+- Work from the existing Prisma-based data layer.
+- Do **not** replace Prisma with another ORM or raw-SQL-heavy approach unless the user explicitly requests that.
+- Do **not** redesign the data model beyond the scope of the requested feature.
+
+---
+
+## Current baseline
+
+Current schema location:
+
+```
+backend/prisma/schema.prisma
+```
+
+Current minimal model:
+
+- `User`
+
+That minimal schema is only a baseline. Extend it carefully when features require it.
+
+---
+
+## Prisma schema conventions
+
+- Model names: singular PascalCase (`User`, `Candidate`, `JobApplication`)
+- Field names: camelCase (`createdAt`, `jobOfferId`)
+- Use explicit relations with `@relation(...)`
+- Use `@unique` or `@@unique` for real uniqueness constraints
+- Use `@@index` for fields queried frequently
+
+If the underlying PostgreSQL naming should remain snake_case, use Prisma mapping features:
+
+- `@map("created_at")`
+- `@@map("job_applications")`
+
+This lets Prisma stay idiomatic in TypeScript without forcing a database naming rewrite.
+
+---
+
+## Recommended modeling practices
+
+- Prefer explicit IDs on every model.
+- For timestamps, use:
+  - `createdAt DateTime @default(now())`
+  - `updatedAt DateTime @updatedAt`
+- Use enums for constrained state values when the domain has a fixed set of states.
+- Add nullable fields only when the domain truly allows absence.
+- Add relations and indexes deliberately, not speculatively.
+
+---
+
+## Migrations
+
+- When changing the schema, use Prisma's migration workflow instead of editing the database manually.
+- Do not hand-edit generated migration artifacts unless there is a strong reason and you understand the consequences.
+- Do not modify previously applied migrations just to "clean them up"; add a new migration for new changes.
+- Regenerate the Prisma client after schema changes.
+
+---
+
+## Query and access rules
+
+- Prefer Prisma Client for application data access.
+- If raw SQL is genuinely necessary, keep it parameterized and isolated.
+- Avoid duplicating data-access logic across many modules.
+- Keep transactional logic explicit when multiple writes must succeed or fail together.
+
+---
+
+## Domain guidance for this project
+
+This repository is a talent tracking system. Likely future entities may include things like:
+
+- users
+- candidates
+- job offers
+- applications
+
+Only add those models when the requested feature requires them. Do not prebuild unused schema.
+
+---
+
+## Environment and safety
+
+- Read `DATABASE_URL` from environment variables.
+- Never commit credentials.
+- Keep development and production assumptions separate.
+- Be careful with destructive schema changes such as dropping columns or tables.
+
+---
+
+## Quick checklist
+
+- [ ] The change stays within the current Prisma + PostgreSQL approach.
+- [ ] Model and field names are consistent and idiomatic.
+- [ ] Constraints and indexes match actual business rules.
+- [ ] Schema changes use Prisma migration workflow.
+- [ ] Prisma client regeneration is accounted for after schema changes.
+- [ ] No unnecessary data model redesign was introduced.
