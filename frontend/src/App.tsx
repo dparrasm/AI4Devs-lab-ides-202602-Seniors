@@ -1,23 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import { AddCandidateForm } from './components/AddCandidateForm';
 import './App.css';
 
 function App() {
+  const [showAddForm, setShowAddForm] = useState(false);
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Recruiter Dashboard</h1>
+        <p className="App-subtitle">LTI Talent Tracking System</p>
+
+        {!showAddForm ? (
+          <section className="App-dashboard" aria-label="Main actions">
+            <a
+              href="#add-candidate"
+              className="App-cta"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowAddForm(true);
+              }}
+            >
+              Add candidate
+            </a>
+            <p className="App-hint">
+              Add new candidates to the ATS and manage their selection process.
+            </p>
+          </section>
+        ) : (
+          <section className="App-form-section" aria-label="Add candidate">
+            <AddCandidateForm
+              onCancel={() => setShowAddForm(false)}
+              onSuccess={() => setShowAddForm(false)}
+            />
+          </section>
+        )}
       </header>
     </div>
   );
